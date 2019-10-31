@@ -21,9 +21,54 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-//! This is ma binary file
+//! This is my binary file
+
+
+
+
+mod cli;
+use cli::susq_cli::*;
+use susq::*;
+
+
+
 
 fn main (){
 
-    println!("Test this!");
+    // Parse CLI
+    let cli = parse_cli();
+
+    // Open anNot implemented at this pointd read file
+//    let text = read(options.value_of("input").unwrap(), true);
+    // true -> record sequential, false -> join records
+
+    // compute SA
+//    let sa = compute_suffix_array(text);
+
+
+//    let susq = SuSQ::new();
+    // utilize the approach
+    match cli.subcommand_name() {
+        Some("kasai") => {
+            println!("Using {}...",cli.subcommand_name().unwrap());
+//            susq.compute().kasai();
+
+        },
+        Some("kark") => {
+            println!("Not implemented at this point");
+//            susq.compute().karkainnen();
+        },
+        Some("gog") => {
+            println!("Not implemented at this point");
+//            susq.compute().gog();
+        },
+        Some("bak") => {
+            println!("Good choice, but not implemented at this point");
+//            susq.compute().bakaric();
+        },
+        _ =>  println!(" \nDon't be crazy!! \
+                         \nYou have to choose an algorithm! \
+                         \n  See help(-h) for details...\n")
+     }
+
 }
