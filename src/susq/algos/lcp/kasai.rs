@@ -1,29 +1,36 @@
+
+
 use std;
-use crate::util::errors::LCPError;
+use crate::util::errors::{Error};
+use crate::util::errors::Error::LengthErr;
+
+use crate::susq::algos::Lcp;
+
+use snafu::{Snafu, Backtrace, ErrorCompat, ResultExt, ensure};
 
 
-//! # Usage Example
-//!
-//! ```rust
+// # Usage Example
+//
+// ```rust
 
-//! use susq::alphabets;
-//! use susq::algos::lcp::Kasai;
-//!
-//! let string = b"ACGGATGCTGGATCGGATCGCGCTAGCTA$";
-//!
-//! // Compute susq array for a given string.
-//! let alphabet = alphabets::dna::iupac_alphabet();
-//! let susq = SusQ::new(string,suffarray);
+// use susq::alphabets;
+// use susq::algos::lcp::Kasai;
+//
+// let string = b"ACGGATGCTGGATCGGATCGCGCTAGCTA$";
+//
+// // Compute susq array for a given string.
+// let alphabet = alphabets::dna::iupac_alphabet();
+// let susq = SusQ::new(string,suffarray);
 
 
 use std::ops::{Add,Sub};
 use std::convert::TryInto;
 
 
-pub type LcpKas<T>  = Vec<T>;
+pub type KasLcp<T>  = Vec<T>;
 
 
-impl <T> Compute<T> for LcpKas<T>
+impl <T> Lcp<T> for KasLcp<T>
     where T:Copy +
             Add<Output = T> +
             Sub<Output = T> +
@@ -31,9 +38,12 @@ impl <T> Compute<T> for LcpKas<T>
             From<u8> +
             Into<usize>
 {
-    fn compute(t: String, sa: Vec<T>) -> Result<LcpKas<T>,LCPError>{
+    fn lcp_compute(t: String, sa: Vec<T>) -> Result<Vec<T>,Error>{
 
-        assert_eq!(t.len(), sa.len());
+        if sa.len() != t.len() {
+            return Err(LengthErr {a: sa.len(), b:t.len()})
+        }
+
         let n = t.len();
         let text = t.as_bytes();
 
@@ -57,6 +67,12 @@ impl <T> Compute<T> for LcpKas<T>
                  0
              };
         }
-        Ok(lcp)
+        //  lcp.push(T::from(5)); // debug
+        if lcp.len() != t.len() {
+            Err(LengthErr {a:lcp.len(), b:t.len()})
+        }else{
+            Ok(lcp)
+        }
+
     }
 }

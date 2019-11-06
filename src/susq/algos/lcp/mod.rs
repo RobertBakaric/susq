@@ -1,12 +1,7 @@
 pub mod kasai;
-// pub mod karkkainen;
 
 
-pub trait Compute <T>{
-    fn compute(text: String, sa: Vec<T>) -> Result<Lcp<T>,LCPError>;
-}
-
-
+/*
 #[derive(Debug, Fail)]
 pub enum Error {
     /// An error occurred while uploading the file.
@@ -20,3 +15,4 @@ impl From<LcpError> for Error {
         Error::Lcp(err)
     }
 }
+*/
