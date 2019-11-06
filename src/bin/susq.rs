@@ -21,14 +21,16 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-//! This is my binary file
+//! This is main binary
 
 
 
 
 mod cli;
 use cli::susq_cli::*;
-use susq::*;
+
+
+use susq::{SuSQ,SuSComp};
 
 
 
@@ -38,37 +40,41 @@ fn main (){
     // Parse CLI
     let cli = parse_cli();
 
-    // Open anNot implemented at this pointd read file
-//    let text = read(options.value_of("input").unwrap(), true);
+    // Open and read files
     // true -> record sequential, false -> join records
+/*
+    let text = read_fastq(
+        cli.value_of("input").unwrap(),
+        true
+    );
+*/
 
-    // compute SA
-//    let sa = compute_suffix_array(text);
+    let text = "ACCGCTAGCTA$".to_string();
+
+    // construct an object
+    let susq = SuSQ::new(text).make_sa();
+
+    println!("{:?}", susq.get_sa());
+
+    //Alternatives:
+    //let sa =  suffix_array(text); // if set an explicit sa is being calculated
+    //let susq = SuSQ::new(text,sa);
 
 
-//    let susq = SuSQ::new();
     // utilize the approach
-    match cli.subcommand_name() {
-        Some("kasai") => {
-            println!("Using {}...",cli.subcommand_name().unwrap());
-//            susq.compute().kasai();
 
-        },
-        Some("kark") => {
-            println!("Not implemented at this point");
-//            susq.compute().karkainnen();
-        },
-        Some("gog") => {
-            println!("Not implemented at this point");
-//            susq.compute().gog();
-        },
-        Some("bak") => {
-            println!("Good choice, but not implemented at this point");
-//            susq.compute().bakaric();
-        },
-        _ =>  println!(" \nDon't be crazy!! \
-                         \nYou have to choose an algorithm! \
-                         \n  See help(-h) for details...\n")
-     }
+    match susq.compute(
+        cli.subcommand_name()
+    ){
+        Ok(true) =>  println!("Computation carried out !"),
+        Ok(false) => panic!("ERROR: Computation terminated !"),
+        Err(e)    => panic!("ERROR: {} ",e)
+    }
 
+    // write resultss
+/*    write_susa(
+        susq.get_susa(),
+        cli.value_of("output").unwrap()
+    );
+*/
 }
