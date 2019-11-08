@@ -30,7 +30,7 @@ mod cli;
 use cli::susq_cli::*;
 
 
-use susq::{SuSQ,SuSComp};
+use susq::{SuSQ};
 
 
 
@@ -52,9 +52,11 @@ fn main (){
     let text = "ACCGCTAGCTA$".to_string();
 
     // construct an object
-    let susq = SuSQ::new(text).make_sa();
+    let susq = SuSQ::<usize>::new(text).compute_sa().compute_susa(
+        cli.subcommand_name()
+    );
 
-    println!("{:?}", susq.get_sa());
+    println!("sa {:?}", susq.get_sa());
 
     //Alternatives:
     //let sa =  suffix_array(text); // if set an explicit sa is being calculated
@@ -62,14 +64,16 @@ fn main (){
 
 
     // utilize the approach
-
-    match susq.compute(
+/*
+    susq.compute_susa(
         cli.subcommand_name()
-    ){
+    );
+*/
+    /*{
         Ok(true) =>  println!("Computation carried out !"),
         Ok(false) => panic!("ERROR: Computation terminated !"),
         Err(e)    => panic!("ERROR: {} ",e)
-    }
+    }*/
 
     // write resultss
 /*    write_susa(
