@@ -4,9 +4,7 @@ use std;
 use crate::util::errors::{Error};
 use crate::util::errors::Error::LengthErr;
 
-use crate::susq::algos::Lcp;
-
-use snafu::{Snafu, Backtrace, ErrorCompat, ResultExt, ensure};
+use crate::susq::algos::{Lcp, LcpArray};
 
 
 // # Usage Example
@@ -27,10 +25,7 @@ use std::ops::{Add,Sub};
 use std::convert::TryInto;
 
 
-pub type KasLcp<T>  = Vec<T>;
-
-
-impl <T> Lcp<T> for KasLcp<T>
+impl <T> Lcp<T> for LcpArray<T>
     where T:Copy +
             Add<Output = T> +
             Sub<Output = T> +
@@ -38,7 +33,7 @@ impl <T> Lcp<T> for KasLcp<T>
             From<u8> +
             Into<usize>
 {
-    fn lcp_compute(t: String, sa: Vec<T>) -> Result<Vec<T>,Error>{
+    fn kasai_compute(t: String, sa: Vec<T>) -> Result<LcpArray<T>,Error>{
 
         if sa.len() != t.len() {
             return Err(LengthErr {a: sa.len(), b:t.len()})
@@ -73,6 +68,12 @@ impl <T> Lcp<T> for KasLcp<T>
         }else{
             Ok(lcp)
         }
+
+    }
+
+    fn karkk_compute(t: String, sa: Vec<T>) -> Result<LcpArray<T>,Error>{
+
+        Ok(vec![T::from(0);10])
 
     }
 }

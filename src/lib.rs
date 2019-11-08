@@ -75,13 +75,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 use bio::data_structures::suffix_array::suffix_array;
-use snafu::{ensure,Backtrace, ErrorCompat, ResultExt, Snafu};
+//use snafu::{ensure,Backtrace, ErrorCompat, ResultExt, Snafu};
 mod susq;
 mod util;
 
 //use util::utils::{fastq, fasta, file};
-use susq::{Compute};
-use susq::kasai::{KasSusA};
+use susq::{Compute,SusArray};
+use std::fmt::Debug;
+use std::convert::TryInto;
+use std::ops::{Add,Sub};
 
 use util::errors::Error;
 use util::errors::Error::{SetErr};
@@ -90,15 +92,24 @@ use util::errors::Error::{SetErr};
 //  different algos depending on which approacj is being used
 
 #[derive(Clone,Debug)]
-pub struct SuSQ  {
-    sufa: Vec<usize>,
+pub struct SuSQ <T> {
+    sufa: Vec<T>,
     text: String,
-    susa: Vec<usize>
+    susa: Vec<T>
 }
 
 
 // Susq Constructor
-impl  SuSQ {
+impl <T> SuSQ <T>
+    where T:Copy +
+            Add<Output = T> +
+            Sub<Output = T> +
+            PartialOrd +
+            From<u8> +
+            Into<usize> +Clone + Debug,
+        usize: TryInto<T>,
+        <usize as TryInto<T>>::Error: Debug,
+    {
     /// Construct a new SuSQ object
     ///
     ///
@@ -125,21 +136,64 @@ impl  SuSQ {
         // store string
         // alocate array for sus and sa
         SuSQ{
-            sufa: vec![0;text.len()],
-            susa: vec![0;text.len()],
+            sufa: vec![0.try_into().expect("expected conversion to succeed");text.len()],
+            susa: vec![0.try_into().expect("expected conversion to succeed");text.len()],
             text: text,
         }
     }
     // builders
-    pub fn make_sa(mut self)-> Self {
+    pub fn compute_susa (mut self, algo:Option<&str>) ->Self{
+
+        // Arrest sa has been computed
+        match algo {
+            Some("kasai") => {
+                let mode = algo.unwrap();
+                println!("Using {}...", mode);
+                self.susa = SusArray::suscomp_kasai(
+                    self.text.clone(),
+                    self.sufa.clone()
+                ).unwrap();
+            },
+            Some("karkk") => {
+                println!("Not implemented at this point");
+    //            susq.compute().karkainnen();
+            },
+            Some("gog") => {
+                println!("Not implemented at this point");
+    //            susq.compute().gog();
+            },
+            Some("bakar") => {
+                println!("Good choice, but not implemented at this point");
+    //            susq.compute().bakaric();
+            },
+            _ =>  println!(" \nDon't be crazy!! \
+                             \nYou have to choose an algorithm! \
+                             \n  See help(-h) for details...\n")
+         }
+
+         //Ok(self)
+         self
+         //Ok(true)
+         //Err(Error::LengthErr{a: 4, b:5})
+        // r: T if ok Err if not
+    }
+    pub fn compute_sa(mut self)-> Self {
 //        ensure!(self.text.len() > 0, SetErr {a:"set_text()".to_string(),b:"make_sa()".to_string()});
-        self.sufa =  suffix_array(&(self.text.as_bytes()));
+        self.sufa.clear();
+
+        self.sufa.extend(suffix_array(&(self.text.as_bytes())).into_iter().map(|usize_value| {
+            usize_value
+            .try_into()
+            .expect("expected conversion to succeed")
+            }
+        ));
+//        self.sufa = suffix_array(&(self.text.as_bytes()));
         self
     }
 
     // setters
-    pub fn set_sa(mut self, sa: Vec<usize>)-> Self {
-        self.sufa =  sa;
+    pub fn set_sa(mut self, sa: Vec<T>)-> Self {
+        self.sufa = sa;
         self
     }
     pub fn set_text(mut self, text: String) -> Self {
@@ -148,21 +202,15 @@ impl  SuSQ {
     }
 
     // getters
-    pub fn get_susa (&self)-> Result<Vec<usize>,Error>{
+    pub fn get_susa (&self)-> Result<Vec<T>,Error>{
         Ok(self.susa.clone())
     }
-    pub fn get_sa (&self)-> Result<Vec<usize>,Error>{
+    pub fn get_sa (&self)-> Result<Vec<T>,Error>{
         Ok(self.sufa.clone())
     }
 }
 
 
-
-pub trait SuSComp {
-
-    fn compute(&self, mode:Option<&str>)->  Result< bool, Error >;
-
-}
 
 
 pub trait SuSQuery  {
@@ -173,45 +221,6 @@ pub trait SuSQuery  {
 }
 
 
-
-impl SuSComp  for SuSQ {
-
-    fn compute(&self, mode:Option<&str>)-> Result<bool, Error>{
-
-        match mode {
-            Some("kasai") => {
-                let algo = mode.unwrap();
-                println!("Using {}...",algo);
-                let lcp = KasSusA::compute(self.text.clone(),self.sufa.clone())?;
-                println!("lcp{:?}", lcp);
-//                kasai::susq(lcp);
-
-            },
-            Some("kark") => {
-                println!("Not implemented at this point");
-    //            susq.compute().karkainnen();
-            },
-            Some("gog") => {
-                println!("Not implemented at this point");
-    //            susq.compute().gog();
-            },
-            Some("bak") => {
-                println!("Good choice, but not implemented at this point");
-    //            susq.compute().bakaric();
-            },
-            _ =>  println!(" \nDon't be crazy!! \
-                             \nYou have to choose an algorithm! \
-                             \n  See help(-h) for details...\n")
-         }
-
-
-         Ok(true)
-         //Err(Error::LengthErr{a: 4, b:5})
-        // r: T if ok Err if not
-    }
-
-
-}
 
 // make SA -> simply utilize bio lib
 
